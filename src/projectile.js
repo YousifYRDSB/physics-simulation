@@ -66,6 +66,18 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawTarget() {
         ctx.fillStyle = "green";
         ctx.fillRect(target.x, target.y, target.width, target.height);
+
+         // Set the text style for the annotation
+    ctx.fillStyle = "black"; // Choose a color that contrasts well with the target's color
+    ctx.font = "12px Arial"; // Adjust the size and font as needed
+
+    // Calculate text position for better visibility (centering the text on the target)
+    const text = "40x40";
+    const textWidth = ctx.measureText(text).width;
+    const textX = target.x + (target.width / 2) - (textWidth / 2);
+    const textY = target.y + (target.height / 2) + 6; // Adjust this value to center the text vertically within the box
+
+    ctx.fillText(text, textX, textY);
     }
 
     function checkCollision() {
@@ -87,6 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawCannon();
         drawTarget();
+
+        // Call the new functions to draw distance lines and annotations
+    drawDistanceLines();
+    annotateDistance();
 
         ctx.beginPath();
         ctx.arc(position.x, position.y, 5, 0, Math.PI * 2);
@@ -114,13 +130,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateOverlay(initial) {
         if (initial) {
-            document.getElementById('startVel').textContent = `${(Math.sqrt(velocity.x ** 2 + velocity.y ** 2)/100).toFixed(2)} m/s`;
+            document.getElementById('startVel').textContent = `${(Math.sqrt(velocity.x ** 2 + velocity.y ** 2)/100).toFixed(2)}`;
             document.getElementById('startPos').textContent = `(${(position.x/100).toFixed(2)}, ${((canvas.height - position.y)/100).toFixed(2)})`;
             document.getElementById('angle').textContent = `${launchAngle} degrees`;
         }
         // Always update current velocity and position
-        document.getElementById('currentVel').textContent = `${(Math.sqrt(velocity.x ** 2 + velocity.y ** 2)/100).toFixed(2)} m/s`;
+        document.getElementById('currentVel').textContent = `${(Math.sqrt(velocity.x ** 2 + velocity.y ** 2)/100).toFixed(2)}`;
         document.getElementById('currentPos').textContent = `(${(position.x/100).toFixed(2)}, ${((canvas.height - position.y)/100).toFixed(2)})`;
+    }
+
+    function drawDistanceLines() {
+        // Draw line for X difference
+        ctx.beginPath();
+        ctx.moveTo(50, canvas.height - 50); // Start from cannon base
+        ctx.lineTo(target.x, canvas.height - 50); // Horizontal line to target's X
+        ctx.strokeStyle = 'rgba(0, 0, 255, 0.5)'; // Semi-transparent blue
+        ctx.stroke();
+    
+        // Draw line for Y difference
+        ctx.beginPath();
+        ctx.moveTo(target.x, canvas.height - 50); // Start from the end of the X difference line
+        ctx.lineTo(target.x, target.y); // Vertical line to target's Y
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Semi-transparent red
+        ctx.stroke();
+    }
+    
+    function annotateDistance() {
+        const xDiff = Math.abs(5- - target.x);
+        const yDiff = Math.abs((canvas.height - 50) - target.y);
+    
+        // Annotate X difference
+        ctx.fillStyle = 'blue';
+        ctx.font = '16px Arial';
+        ctx.fillText(`Δx: ${xDiff} px`, (50 + target.x) / 2, canvas.height - 50 + 20); // Halfway along the line
+    
+        // Annotate Y difference
+        ctx.fillStyle = 'red';
+        ctx.fillText(`Δy: ${yDiff} px`, target.x + 5, (canvas.height - 50 + target.y) / 2); // Halfway along the line
     }
 
 });
